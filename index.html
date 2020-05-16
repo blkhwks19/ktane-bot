@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>KTANE Bot</title>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.min.js"></script>
+
+<script type="text/babel">
+var batteries = 0;
+var parallel = false;
+var serialEven = false;
+var serialVowel = false;
+var frkIndicator = false;
+var carIndicator = false;
+var strikes = 0;
+var last = 'Nothing to repeat';
+
+// modules
+memory = [];
+morse = '';
+
+window.onload = () => {
+  if (annyang) {
+    var commands = {
+      // status
+      'bomb reset': bombReset,
+      'reset bomb': bombReset,
+      'batteries *num': setBatteries,
+      'parallel :b': setParallel,
+      'serial :evenodd': setSerialEven,
+      'serial vowel :b': setSerialVowel,
+      'car :b': setCarIndicator,
+      'freak :b': setFrkIndicator,
+      '(add) strike': setStrike,
+      'repeat (last) (command)': repeat,
+
+      // modules
+      'wires *colors': wires,
+      'button :color :text': button,
+      'button hold :color': buttonHold,
+      'keypads *symbols': keypads,
+      'simon *colors': simon,
+      'memory *nums': memory,
+      'memory reset': memoryReset,
+      'morse *params': morse,
+      'morse reset': morseReset,
+    }
+    annyang.addCommands(commands);
+    // annyang.start();
+  }
+}
+
+
+
+function morse(params) {
+  // var arr = params.split(' ');
+  var letters = [
+    {letter:'a', val:'.-'},
+    {letter:'b', val:'-...'},
+    {letter:'c', val:'-.-.'},
+    {letter:'d', val:'-..'},
+    {letter:'e', val:'.'},
+    {letter:'f', val:'..-.'},
+    {letter:'g', val:'--.'},
+    {letter:'h', val:'....'},
+    {letter:'i', val:'..'},
+    {letter:'j', val:'.---'},
+    {letter:'k', val:'-.-'},
+    {letter:'l', val:'.-..'},
+    {letter:'m', val:'--'},
+    {letter:'n', val:'-.'},
+    {letter:'o', val:'---'},
+    {letter:'p', val:'.--.'},
+    {letter:'q', val:'--.-'},
+    {letter:'r', val:'.-.'},
+    {letter:'s', val:'...'},
+    {letter:'t', val:'-'},
+    {letter:'u', val:'..-'},
+    {letter:'v', val:'...-'},
+    {letter:'x', val:'-..-'},
+    {letter:'y', val:'-.--'},
+    {letter:'z', val:'--..'},
+  ];
+  var words = [
+    {word:'shell', freq:'5 0 5'},
+    {word:'halls', freq:'5 1 5'},
+    {word:'slick', freq:'5 2 2'},
+    {word:'trick', freq:'5 3 2'},
+    {word:'boxes', freq:'5 3 5'},
+    {word:'leaks', freq:'5 4 2'},
+    {word:'strobe', freq:'5 4 5'},
+    {word:'bistro', freq:'5 5 2'},
+    {word:'flick', freq:'5 5 5'},
+    {word:'bombs', freq:'5 6 5'},
+    {word:'break', freq:'5 7 2'},
+    {word:'brick', freq:'5 7 5'},
+    {word:'steak', freq:'5 8 2'},
+    {word:'sting', freq:'5 9 2'},
+    {word:'vector', freq:'5 9 5'},
+    {word:'beats', freq:'6 0 0'},
+  ];
+
+  var code = params.replace('dot', '.').replace('dash', '-').replace(' ', '');
+  var obj = letters.find(x => x.val === code);
+  morse += obj.letter;
+
+  var results = words.filter(x => x.word.startsWith(morse));
+  if (results.length === 1) {
+    speak(results[0].freq);
+  }
+}
+
+function morseReset() {
+  morse = '';
+  speak('Morse reset');
+}
+
+function memory(nums) {
+  var arr = nums.split(' ');
+  var display = arr.shift();
+  var p, v;
+  if (memory.length === 0) { // stage 1
+    switch(display) {
+      case 'one':
+        p = 1;
+        v = arr[1];
+        break;
+      case 'two':
+        p = 1;
+        v = arr[1];
+        break;
+      case 'three':
+        p = 2;
+        v = arr[2];
+        break;
+      case 'four':
+        p = 3;
+        v = arr[3];
+        break;
+      default:
+        break;
+    }
+  } else if (memory.length === 1) { // stage 2
+    switch(display) {
+      case 'one':
+        p = arr.indexOf('four');
+        v = 'four';
+        break;
+      case 'two':
+        p = memory[0].pos;
+        v = arr[memory[0].pos];
+        break;
+      case 'three':
+        p = 0;
+        v = arr[0];
+        break;
+      case 'four':
+        p = memory[0].pos;
+        v = arr[memory[0].pos];
+        break;
+      default:
+        break;
+    }
+  } else if (memory.length === 2) { // stage 3
+    switch(display) {
+      case 'one':
+        p = arr.indexOf(memory[1].val);
+        v = memory[1].val;
+        break;
+      case 'two':
+        p = arr.indexOf(memory[0].val);
+        v = memory[0].val;
+        break;
+      case 'three':
+        p = 2;
+        v = arr[2];
+        break;
+      case 'four':
+        p = arr.indexOf('four');
+        v = 'four';
+        break;
+      default:
+        break;
+    }
+  } else if (memory.length === 3) { // stage 4
+    switch(display) {
+      case 'one':
+        p = memory[0].pos;
+        v = arr[memory[0].pos];
+        break;
+      case 'two':
+        p = 0;
+        v = arr[0];
+        break;
+      case 'three':
+        p = memory[1].pos;
+        v = arr[memory[1].pos];
+        break;
+      case 'four':
+        p = memory[1].pos;
+        v = arr[memory[1].pos];
+        break;
+      default:
+        break;
+    }
+  } else if (memory.length === 4) { // stage 5
+    switch(display) {
+      case 'one':
+        p = arr.indexOf(memory[0].val);
+        v = memory[0].val;
+        break;
+      case 'two':
+        p = arr.indexOf(memory[1].val);
+        v = memory[1].val;
+        break;
+      case 'three':
+        p = arr.indexOf(memory[3].val);
+        v = memory[3].val;
+        break;
+      case 'four':
+        p = arr.indexOf(memory[2].val);
+        v = memory[2].val;
+        break;
+      default:
+        break;
+    }
+  }
+  memory.push({pos:p, val:v});
+  speak(v);
+}
+
+function memoryReset() {
+  memory = [];
+  speak('Memory reset');
+}
+
+function simon(colors) {
+  var arr = colors.split(' ');
+
+  var result = [];
+  var vowel = {
+    'red': ['blue', 'yellow', 'green'],
+    'blue': ['red', 'green', 'red'],
+    'green': ['yellow', 'blue', 'yellow'],
+    'yellow': ['green', 'red', 'blue'],
+  }
+  var noVowel = {
+    'red': ['blue', 'red', 'yellow'],
+    'blue': ['yellow', 'blue', 'green'],
+    'green': ['green', 'yellow', 'blue'],
+    'yellow': ['red', 'green', 'red'],
+  }
+  
+  for (color of colors) {
+    var newColor = (serialVowel) ? vowel[color][strikes] : noVowel[color][strikes];
+    result.push(newColor);
+  }
+
+  speak(result.join(' '));
+}
+
+function keypads(symbols) {
+  var arr = symbols.split(' ');
+  var groups = [
+    ['q', 'a', 'y', 'lightning', 'triangle', 'h', 'c'],
+    ['e', 'q', 'c', 'curly', 'star', 'h', 'question'],
+    ['copyright', 'w', 'curly', 'k', 'r', 'y', 'star'],
+    ['six', 'paragraph', 'b', 'triangle', 'k', 'question', 'smiley'],
+    ['trident', 'smiley', 'b', 'c', 'paragraph', 'three', 'star'],
+    ['six', 'e', 'equal', 'vowels', 'trident', 'n', 'omega']
+  ];
+
+  var result;
+  for (group of groups) {
+    result = '';
+    for (symbol of arr) {
+      if (!group.includes(symbol)) {
+        break;
+      } else {
+        for (symbol2 of group) {
+          if (arr.includes(symbol2)) {
+            result += symbol2 + ' ';
+          }
+        }
+      }
+    }
+  }
+
+  speak(result);
+}
+
+function button(btnColor, text) {
+  if (btnColor === 'blue' && text === 'abort') {
+    speak('Hold');
+  } else if (batteries > 1 && text == 'detonate') {
+    speak('Press and release');
+  } else if (btnColor === 'white' && carIndicator) {
+    speak('Hold');
+  } else if (batteries > 2 && frkIndicator) {
+    speak('Press and release');
+  } else if (btnColor === 'yellow') {
+    speak('Hold');
+  } else if (btnColor === 'red' && text === 'hold') {
+    speak("Press and release");
+  } else {
+    speak('Hold');
+  }
+}
+function buttonHold(lightColor) {
+  switch(lightColor) {
+    case 'blue':
+      speak('Four');
+      break;
+    case 'white':
+      speak('One');
+      break;
+    case 'yellow':
+      speak('Five');
+      break;
+    default:
+      speak('One');
+      break;
+  }
+}
+
+function wires(colors) {
+  var arr = colors.split(' ');
+  switch(arr.length) {
+    case 3:
+      if (!arr.includes('red')) {
+        speak('Cut second wire');
+      } else if (arr[arr.length-1] === 'white') {
+        speak('Cut last wire');
+      } else if (countWires(arr, 'blue') > 1) {
+        speak('Cut last blue wire');
+      } else {
+        speak('Cut last wire');
+      }
+      break;
+    case 4:
+      if (countWires(arr, 'red') > 1 && !serialEven) {
+        speak('Cut last red wire');
+      } else if (arr[arr.length-1] === 'yellow' && !arr.includes('red')) {
+        speak('Cut first wire');
+      } else if (countWires(arr, 'blue') === 1) {
+        speak('Cut first wire');
+      } else if(countWires(arr, 'yellow') > 1) {
+        speak('Cut last wire');
+      } else {
+        speak('Cut second wire');
+      }
+      break;
+    case 5:
+      if (arr[arr.length-1] === 'black' && !serialEven) {
+        speak('Cut fourth wire');
+      } else if (countWires(arr, 'red') === 1 && countWires(arr, 'yellow') > 1) {
+        speak('Cut first wire');
+      } else if (!arr.includes('black')) {
+        speak('Cut second wire');
+      } else {
+        speak('Cut first wire');
+      }
+      break;
+    case 6:
+      if (!arr.includes('yellow') && !serialEven) {
+        speak('Cut third wire');
+      } else if (countWires(arr, 'yellow') === 1 && countWires(arr, 'white') > 1) {
+        speak('Cut fourth wire');
+      } else if (!arr.includes('red')) {
+        speak('Cut last wire');
+      } else {
+        speak('Cut fourth wire');
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+function countWires(arr, color) {
+  var filteredArr = arr.filter(function(c) {
+    return c === color;
+  });
+  return filteredArr.length;
+}
+
+
+
+
+function bombReset() {
+  batteries = 0;
+  parallel = false;
+  serialEven = false;
+  serialVowel = false;
+  frkIndicator = false;
+  carIndicator = false;
+  strikes = 0;
+  speak('Bomb reset');
+}
+
+function setBatteries(num) {
+  // might have to parse words (ex 'one' vs 'won')
+  batteries = parseInt(num);
+  speak('Batteries ' + num);
+}
+
+function setParallel (b) {
+  parallel = b;
+  speak('Parallel ' + b);
+}
+
+function setSerialEven(evenodd) {
+  serialEven = (evenodd === 'even') ? true : false;
+  speak('Serial even is ' + serialEven);
+}
+
+function setSerialVowel(b) {
+  serialVowel = b;
+  speak('Serial vowel ' + b);
+}
+
+function setCarIndicator(b) {
+  carIndicator = b;
+  speak('Car ' + b);
+}
+
+function setFrkIndicator(b) {
+  frkIndicator = b;
+  speak('Freak ' + b);
+}
+
+function setStrike() {
+  strikes++;
+  speak('Strike');
+}
+
+function repeat() {
+  speak(last);
+}
+
+
+
+
+
+function speak(text) {
+  var u = new SpeechSynthesisUtterance();
+  u.text = text;
+  last = text;
+	u.volume = 1; // float between 0-1
+	u.rate = 0.6; // float between 0-10
+	u.pitch = 1; // float between 0-2
+  speechSynthesis.speak(u);
+}
+</script>
+</head>
+<body>
+  
+</body>
+</html>
