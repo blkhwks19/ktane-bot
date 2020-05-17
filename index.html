@@ -16,8 +16,13 @@ var strikes = 0;
 var last = 'Nothing to repeat';
 
 // modules
-memory = [];
-morse = '';
+var memory = [];
+var morse = '';
+var wireSequence = {
+  red: 0,
+  blue: 0,
+  black: 0,
+}
 
 window.onload = () => {
   if (annyang) {
@@ -35,15 +40,17 @@ window.onload = () => {
       'repeat (last) (command)': repeat,
 
       // modules
-      'wires *colors': wires,
-      'button :color :text': button,
-      'button hold :color': buttonHold,
-      'keypads *symbols': keypads,
-      'simon *colors': simon,
-      'memory *nums': memory,
-      'memory reset': memoryReset,
-      'morse *params': morse,
-      'morse reset': morseReset,
+      'wires *colors': wiresModule,
+      'button :color :text': buttonModule,
+      'button hold :color': buttonHoldModule,
+      'keypads *symbols': keypadsModule,
+      'simon *colors': simonSaysModule,
+      'memory *nums': memoryModule,
+      'memory reset': memoryModuleReset,
+      'morse *params': morseModule,
+      'morse reset': morseModuleReset,
+      'wire sequence :c1 :l1 :c2 :l2 :c3 :l3': wireSequenceModule,
+      'wire sequence reset': wireSequenceModuleReset
     }
     annyang.addCommands(commands);
     // annyang.start();
@@ -52,7 +59,42 @@ window.onload = () => {
 
 
 
-function morse(params) {
+function wireSequenceModule(c1, l1, c2, l2, c3, l3) {
+  var sequences = {
+    red: ['c','b','a','ac','b','ac','abc','ab','b'],
+    blue: ['b','ac','b','a','b','bc','c','ac','a'],
+    black: ['abc','ac','b','ac','b','bc','ab','c','c'],
+  }
+  
+  var letter = '';
+  if (c1 !== undefined && l1 !== undefined) {
+    letter = sequences[c1][wireSequence[c1]]
+    (letter.includes(l1)) ? speak('Cut') : speak("Don't cut");
+    wireSequence[c1]++;
+  }
+
+  if (c2 !== undefined && l2 !== undefined) {
+    letter = sequences[c2][wireSequence[c2]]
+    (letter.includes(l2)) ? speak('Cut') : speak("Don't cut");
+    wireSequence[c2]++;
+  }
+
+  if (c3 !== undefined && l3 !== undefined) {
+    letter = sequences[c3][wireSequence[c3]]
+    (letter.includes(l3)) ? speak('Cut') : speak("Don't cut");
+    wireSequence[c3]++;
+  }
+  
+}
+
+function wireSequenceModuleReset() {
+  wireSequence.red = 0;
+  wireSequence.blue = 0;
+  wireSequence.black = 0;
+  speak('Wire sequence reset');
+}
+
+function morseModule(params) {
   // var arr = params.split(' ');
   var letters = [
     {letter:'a', val:'.-'},
@@ -110,12 +152,12 @@ function morse(params) {
   }
 }
 
-function morseReset() {
+function morseModuleReset() {
   morse = '';
   speak('Morse reset');
 }
 
-function memory(nums) {
+function memoryModule(nums) {
   var arr = nums.split(' ');
   var display = arr.shift();
   var p, v;
@@ -229,12 +271,12 @@ function memory(nums) {
   speak(v);
 }
 
-function memoryReset() {
+function memoryModuleReset() {
   memory = [];
   speak('Memory reset');
 }
 
-function simon(colors) {
+function simonSaysModule(colors) {
   var arr = colors.split(' ');
 
   var result = [];
@@ -259,7 +301,7 @@ function simon(colors) {
   speak(result.join(' '));
 }
 
-function keypads(symbols) {
+function keypadsModule(symbols) {
   var arr = symbols.split(' ');
   var groups = [
     ['q', 'a', 'y', 'lightning', 'triangle', 'h', 'c'],
@@ -289,7 +331,7 @@ function keypads(symbols) {
   speak(result);
 }
 
-function button(btnColor, text) {
+function buttonModule(btnColor, text) {
   if (btnColor === 'blue' && text === 'abort') {
     speak('Hold');
   } else if (batteries > 1 && text == 'detonate') {
@@ -306,7 +348,7 @@ function button(btnColor, text) {
     speak('Hold');
   }
 }
-function buttonHold(lightColor) {
+function buttonHoldModule(lightColor) {
   switch(lightColor) {
     case 'blue':
       speak('Four');
@@ -323,7 +365,7 @@ function buttonHold(lightColor) {
   }
 }
 
-function wires(colors) {
+function wiresModule(colors) {
   var arr = colors.split(' ');
   switch(arr.length) {
     case 3:
