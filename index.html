@@ -50,7 +50,8 @@ window.onload = () => {
       'morse *params': morseModule,
       'morse reset': morseModuleReset,
       'wire sequence :c1 :l1 :c2 :l2 :c3 :l3': wireSequenceModule,
-      'wire sequence reset': wireSequenceModuleReset
+      'wire sequence reset': wireSequenceModuleReset,
+      'knobs *lights': knobsModule,
     }
     annyang.addCommands(commands);
     // annyang.start();
@@ -58,6 +59,40 @@ window.onload = () => {
 }
 
 
+
+function knobsModule(lights) {
+  var arr = lights.split(' ');
+  
+  var sequence = '';
+  for (light of lights) {
+    if (light === 'on' || light === 'true' || light === 'one') {
+      sequence += '1';
+    } else {
+      sequence += '0';
+    }
+  }
+
+  switch(sequence) {
+    case '001011111101':
+    case '101010011011':
+      speak('Up');
+      break;
+    case '011001111101':
+    case '101010010001':
+      speak('Down');
+      break;
+    case '000010100111':
+    case '000010000110':
+      speak('Left');
+      break;
+    case '101111111010':
+    case '101100111010':
+      speak('Right');
+      break;
+    default:
+      break;
+  }
+}
 
 function wireSequenceModule(c1, l1, c2, l2, c3, l3) {
   var sequences = {
