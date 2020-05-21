@@ -39,9 +39,9 @@ window.onload = () => {
       // status
       'bomb reset': bombReset,
       'reset bomb': bombReset,
-      'batteries *num': setBatteries,
+      'batteries :num': setBatteries,
       'parallel :b': setParallel,
-      'serial :evenodd': setSerialEven,
+      'serial even :b': setSerialEven,
       'serial vowel :b': setSerialVowel,
       'car :b': setCarIndicator,
       'freak :b': setFrkIndicator,
@@ -51,7 +51,7 @@ window.onload = () => {
       // modules
       'wires *colors': wiresModule,
       'button :color :text': buttonModule,
-      'button hold :color': buttonHoldModule,
+      'color :color': buttonHoldModule,
       'keypads *symbols': keypadsModule,
       'simon *colors': simonSaysModule,
       'memory *nums': memoryModule,
@@ -67,7 +67,7 @@ window.onload = () => {
     }
     annyang.addCommands(commands);
     annyang.start();
-    speak('Bot started');
+    speak('Bomb defusing bot started');
   }
 }
 
@@ -381,7 +381,8 @@ function simonSaysModule(colors) {
 }
 
 function keypadsModule(symbols) {
-  var arr = symbols.split(' ');
+  var arr = arrConvertLetters(symbols.toLowerCase().split(' '));
+  
   var groups = [
     ['q', 'a', 'y', 'lightning', 'triangle', 'h', 'c'],
     ['e', 'q', 'c', 'curly', 'star', 'h', 'question'],
@@ -390,6 +391,7 @@ function keypadsModule(symbols) {
     ['trident', 'smiley', 'b', 'c', 'paragraph', 'three', 'star'],
     ['six', 'e', 'equal', 'vowels', 'trident', 'n', 'omega']
   ];
+
 
   var result;
   for (group of groups) {
@@ -411,24 +413,26 @@ function keypadsModule(symbols) {
 }
 
 function buttonModule(btnColor, text) {
-  if (btnColor === 'blue' && text === 'abort') {
+  var color = convertColor(btnColor);
+  if (color === 'blue' && text === 'abort') {
     speak('Hold');
-  } else if (batteries > 1 && text == 'detonate') {
+  } else if (batteries > 1 && text === 'detonate') {
     speak('Press and release');
-  } else if (btnColor === 'white' && carIndicator) {
+  } else if (color === 'white' && carIndicator) {
     speak('Hold');
   } else if (batteries > 2 && frkIndicator) {
     speak('Press and release');
-  } else if (btnColor === 'yellow') {
+  } else if (color === 'yellow') {
     speak('Hold');
-  } else if (btnColor === 'red' && text === 'hold') {
+  } else if (color === 'red' && text === 'hold') {
     speak('Press and release');
   } else {
     speak('Hold');
   }
 }
 function buttonHoldModule(lightColor) {
-  switch(lightColor) {
+  var color = convertColor(lightColor);
+  switch(color) {
     case 'blue':
       speak('Four');
       break;
@@ -445,8 +449,8 @@ function buttonHoldModule(lightColor) {
 }
 
 function wiresModule(colors) {
-  var arr = arrToLowerCase(colors.split(' '));
-  arr = arrConvertColors(arr);
+  var arr = arrConvertColors(colors.toLowerCase().split(' '));
+  
   switch(arr.length) {
     case 3:
       if (!arr.includes('red')) {
@@ -516,37 +520,30 @@ function bombReset() {
 
 function setBatteries(num) {
   batteries = convertNum(num);
-  speak('Batteries ' + num);
 }
 
-function setParallel (b) {
+function setParallel(b) {
   parallel = convertBoolean(b);
-  speak('Parallel ' + b);
 }
 
-function setSerialEven(evenodd) {
-  serialEven = (evenodd === 'even') ? true : false;
-  speak('Serial even is ' + serialEven);
+function setSerialEven(b) {
+  serialEven = convertBoolean(b);
 }
 
 function setSerialVowel(b) {
   serialVowel = convertBoolean(b);
-  speak('Serial vowel ' + b);
 }
 
 function setCarIndicator(b) {
   carIndicator = convertBoolean(b);
-  speak('Car ' + b);
 }
 
 function setFrkIndicator(b) {
   frkIndicator = convertBoolean(b);
-  speak('Freak ' + b);
 }
 
 function setStrike() {
   strikes++;
-  speak('Strike');
 }
 
 function repeat() {
@@ -569,6 +566,90 @@ function speak(text) {
 
 
 
+
+function convertLetter(l) {
+	var letter = '';
+	switch(l) {
+		case 'b':
+		case 'be':
+		case 'bee':
+		case 'bea':
+			letter = 'b';
+			break;
+		case 'c':
+		case 'cee':
+		case 'sea':
+		case 'see':
+			letter = 'c';
+			break;
+		case 'g':
+		case 'gee':
+			letter = 'g';
+			break;
+		case 'i':
+		case 'eye':
+		case 'aye':
+			letter = 'i';
+			break;
+		case 'j':
+		case 'jay':
+			letter = 'j';
+			break;
+		case 'k':
+		case 'kay':
+		case 'cay':
+    case 'quay':
+			letter = 'k';
+			break;
+		case 'l':
+		case 'el':
+		case 'ell':
+			letter = 'l';
+			break;
+		case 'o':
+		case 'oh':
+			letter = 'o';
+			break;
+		case 'p':
+		case 'pea':
+		case 'pee':
+			letter = 'p';
+			break;
+		case 'q':
+		case 'cue':
+		case 'queue':
+			letter = 'q';
+			break;
+		case 'r':
+		case 'are':
+    case 'our':
+			letter = 'r';
+			break;
+		case 't':
+		case 'tee':
+    case 'tea':
+			letter = 't';
+			break;
+		case 'u':
+		case 'you':
+		case 'ewe':
+			letter = 'u';
+			break;
+    case 'double u':
+    case 'double you':
+    case 'double ewe':
+      letter = 'w';
+      break;
+		case 'y':
+		case 'why':
+			letter = 'y';
+			break;
+		default:
+			letter = l;
+			break;
+	}
+	return letter;
+}
 
 function convertColor(c) {
 	var color = '';
@@ -649,12 +730,12 @@ function convertNum(word) {
 	return num;
 }
 
-function arrConvertColors(arr) {
-  return arr.map(a => convertColor(a) );
+function arrConvertLetters(arr) {
+  return arr.map(x => convertLetter(x) );
 }
 
-function arrToLowerCase(arr) {
-  return arr.map(a => a.toLowerCase() );
+function arrConvertColors(arr) {
+  return arr.map(x => convertColor(x) );
 }
 </script>
 </head>
