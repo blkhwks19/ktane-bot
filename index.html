@@ -62,9 +62,23 @@ window.onload = () => {
       'wire sequence reset': wireSequenceModuleReset,
       'knobs *lights': knobsModule,
       'password *letters': passwordModule,
+
+      'test *params': test,
     }
     annyang.addCommands(commands);
-    // annyang.start();
+    annyang.start();
+    speak('Bot started');
+  }
+}
+
+function test(params) {
+  console.log(params);
+  if (params === 'red blue') {
+    console.log('color red');
+  } else if (params === 'read blue') {
+    console.log('already been read');
+  } else {
+    console.log('something else');
   }
 }
 
@@ -89,8 +103,6 @@ function passwordModule(letters) {
   }
   
 }
-
-
 
 function knobsModule(lights) {
   var arr = lights.split(' ');
@@ -410,7 +422,7 @@ function buttonModule(btnColor, text) {
   } else if (btnColor === 'yellow') {
     speak('Hold');
   } else if (btnColor === 'red' && text === 'hold') {
-    speak("Press and release");
+    speak('Press and release');
   } else {
     speak('Hold');
   }
@@ -433,27 +445,28 @@ function buttonHoldModule(lightColor) {
 }
 
 function wiresModule(colors) {
-  var arr = colors.split(' ');
+  var arr = arrToLowerCase(colors.split(' '));
+  arr = arrConvertColors(arr);
   switch(arr.length) {
     case 3:
       if (!arr.includes('red')) {
         speak('Cut second wire');
       } else if (arr[arr.length-1] === 'white') {
         speak('Cut last wire');
-      } else if (countWires(arr, 'blue') > 1) {
+      } else if (arr.filter(c => c === 'blue').length > 1) {
         speak('Cut last blue wire');
       } else {
         speak('Cut last wire');
       }
       break;
     case 4:
-      if (countWires(arr, 'red') > 1 && !serialEven) {
+      if (arr.filter(c => c === 'red').length > 1 && !serialEven) {
         speak('Cut last red wire');
       } else if (arr[arr.length-1] === 'yellow' && !arr.includes('red')) {
         speak('Cut first wire');
-      } else if (countWires(arr, 'blue') === 1) {
+      } else if (arr.filter(c => c === 'blue').length === 1) {
         speak('Cut first wire');
-      } else if(countWires(arr, 'yellow') > 1) {
+      } else if(arr.filter(c => c === 'yellow').length > 1) {
         speak('Cut last wire');
       } else {
         speak('Cut second wire');
@@ -462,7 +475,7 @@ function wiresModule(colors) {
     case 5:
       if (arr[arr.length-1] === 'black' && !serialEven) {
         speak('Cut fourth wire');
-      } else if (countWires(arr, 'red') === 1 && countWires(arr, 'yellow') > 1) {
+      } else if (arr.filter(c => c === 'red').length === 1 && arr.filter(c => c === 'yellow').length > 1) {
         speak('Cut first wire');
       } else if (!arr.includes('black')) {
         speak('Cut second wire');
@@ -473,7 +486,7 @@ function wiresModule(colors) {
     case 6:
       if (!arr.includes('yellow') && !serialEven) {
         speak('Cut third wire');
-      } else if (countWires(arr, 'yellow') === 1 && countWires(arr, 'white') > 1) {
+      } else if (arr.filter(c => c === 'yellow').length === 1 && arr.filter(c => c === 'white').length > 1) {
         speak('Cut fourth wire');
       } else if (!arr.includes('red')) {
         speak('Cut last wire');
@@ -486,12 +499,6 @@ function wiresModule(colors) {
   }
 }
 
-function countWires(arr, color) {
-  var filteredArr = arr.filter(function(c) {
-    return c === color;
-  });
-  return filteredArr.length;
-}
 
 
 
@@ -508,13 +515,12 @@ function bombReset() {
 }
 
 function setBatteries(num) {
-  // might have to parse words (ex 'one' vs 'won')
-  batteries = parseInt(num);
+  batteries = convertNum(num);
   speak('Batteries ' + num);
 }
 
 function setParallel (b) {
-  parallel = b;
+  parallel = convertBoolean(b);
   speak('Parallel ' + b);
 }
 
@@ -524,17 +530,17 @@ function setSerialEven(evenodd) {
 }
 
 function setSerialVowel(b) {
-  serialVowel = b;
+  serialVowel = convertBoolean(b);
   speak('Serial vowel ' + b);
 }
 
 function setCarIndicator(b) {
-  carIndicator = b;
+  carIndicator = convertBoolean(b);
   speak('Car ' + b);
 }
 
 function setFrkIndicator(b) {
-  frkIndicator = b;
+  frkIndicator = convertBoolean(b);
   speak('Freak ' + b);
 }
 
@@ -559,6 +565,96 @@ function speak(text) {
 	u.rate = 0.6; // float between 0-10
 	u.pitch = 1; // float between 0-2
   speechSynthesis.speak(u);
+}
+
+
+
+
+function convertColor(c) {
+	var color = '';
+	switch (c) {
+		case 'read':
+			color = 'red';
+			break;
+    case 'bleu':
+		case 'blew':
+			color = 'blue';
+			break;
+		default:
+			color = c;
+			break;
+	}
+	return color;
+}
+
+function convertBoolean(b) {
+	var bool;
+  switch(b) {
+    case 'true':
+    case 'yes':
+      bool = true;
+      break;
+    default:
+      bool = false;
+      break;
+  }
+	return bool;
+}
+
+function convertNum(word) {
+	var num;
+  switch(word) {
+    case 'one':
+    case 'won':
+      num = 1;
+      break;
+    case 'two':
+    case 'too':
+    case 'to':
+      num = 2;
+      break;
+    case 'three':
+      num = 3;
+      break;
+    case 'four':
+    case 'for':
+    case 'fore':
+      num = 4;
+      break;
+    case 'five':
+      num = 5;
+      break;
+    case 'six':
+      num = 6;
+      break;
+    case 'seven':
+      num = 7;
+      break;
+    case 'eight':
+    case 'ate':
+      num = 8;
+      break;
+    case 'nine':
+      num = 9;
+      break;
+    case 'zero':
+    case 'o':
+    case 'oh':
+      num = 0;
+      break;
+    default:
+      num = word;
+      break;
+  }
+	return num;
+}
+
+function arrConvertColors(arr) {
+  return arr.map(a => convertColor(a) );
+}
+
+function arrToLowerCase(arr) {
+  return arr.map(a => a.toLowerCase() );
 }
 </script>
 </head>
