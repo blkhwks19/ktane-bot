@@ -14,6 +14,8 @@ var frkIndicator = false;
 var carIndicator = false;
 var strikes = 0;
 var last = 'Nothing to repeat';
+var defusedPhrases = ["Sweet", "Alright", "Woohoo", "Hot damn", "Damn right", "Goddamn right", "Hell yeah", "Fuck yeah", "Shit yeah", "Suck it", "We did it", "You owe me", "You owe me big time", "You owe me a beer", "You're welcome", "You're welcome asshole", "I am your bomb defusing overlord", "I made that bomb my bitch", "Way to go", "Way to go bro", "Way to go dude", "Excellent", "Nicely done", "Can I go now?"];
+var explodedPhrases = ["You programmed me asshole", "Oh no", "I'm sorry", "It's all my fault", "It's all your fault", "You stupid fuck", "I let you down", "I failed you", "Shit", "Fuck", "God dammit", "Son of a bitch", "Mother fucker", "Well shit", "You suck", "Balls", "Bollocks", "Crap", "It wasn't my fault", "Well whose fault was that?"];
 
 // modules
 var memory = [];
@@ -47,6 +49,11 @@ window.onload = () => {
       'freak :b': setFrkIndicator,
       '(add) strike': setStrike,
       'repeat (last) (command)': repeat,
+      '(bomb) defused': defused,
+      '(bomb) disarmed': defused,
+      '(bomb) exploded': exploded,
+      '(bomb) detonated': exploded,
+      '(bomb) blew up': exploded,
 
       // modules
       'wires *colors': wiresModule,
@@ -63,8 +70,6 @@ window.onload = () => {
       'wire sequence reset': wireSequenceModuleReset,
       'knobs *lights': knobsModule,
       'password *letters': passwordModule,
-
-      'test *params': test,
     }
     annyang.addCommands(commands);
     annyang.start();
@@ -72,16 +77,8 @@ window.onload = () => {
   }
 }
 
-function test(params) {
-  console.log(params);
-  if (params === 'red blue') {
-    console.log('color red');
-  } else if (params === 'read blue') {
-    console.log('already been read');
-  } else {
-    console.log('something else');
-  }
-}
+
+
 
 
 
@@ -510,7 +507,6 @@ function wiresModule(colors) {
 
 
 
-
 function bombReset() {
   batteries = 0;
   parallel = false;
@@ -740,6 +736,19 @@ function arrConvertLetters(arr) {
 
 function arrConvertColors(arr) {
   return arr.map(x => convertColor(x) );
+}
+
+function defused() {
+  var rand = randRange(0, defusedPhrases.length-1);
+  speak(defusedPhrases[rand]);
+}
+function exploded() {
+  var rand = randRange(0, explodedPhrases.length-1);
+  speak(explodedPhrases[rand]);
+}
+
+function randRange(min, max){
+	return Math.round(Math.random() * (max - min) + min);
 }
 </script>
 </head>
