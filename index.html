@@ -22,7 +22,16 @@ var wireSequence = {
   red: 0,
   blue: 0,
   black: 0,
-}
+};
+var passwords = ['about', 'after', 'again', 'below', 'could', 
+                 'every', 'first', 'found', 'great', 'house', 
+                 'large', 'learn', 'never', 'other', 'place', 
+                 'plant', 'point', 'right', 'small', 'sound', 
+                 'spell', 'still', 'study', 'their', 'there', 
+                 'these', 'thing', 'think', 'three', 'water', 
+                 'where', 'which', 'world', 'would', 'write'];
+var passwordPossibles = [...passwords];
+var passwordLetters = [];
 
 window.onload = () => {
   if (annyang) {
@@ -52,10 +61,33 @@ window.onload = () => {
       'wire sequence :c1 :l1 :c2 :l2 :c3 :l3': wireSequenceModule,
       'wire sequence reset': wireSequenceModuleReset,
       'knobs *lights': knobsModule,
+      'password *letters': passwordModule,
     }
     annyang.addCommands(commands);
     // annyang.start();
   }
+}
+
+
+
+function passwordModule(letters) {
+  var arr = letters.split(' ');
+  
+  passwordLetters.push([...arr]);
+  passwordPossibles = passwordPossibles.filter((word) => {
+    for (var i = 0; i < passwordLetters.length; i++) {
+      var letter = word[i];
+      if (!passwordLetters[i].includes(letter)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  if (passwordPossibles.length === 1) {
+    speak(passwordPossibles[0]);
+  }
+  
 }
 
 
