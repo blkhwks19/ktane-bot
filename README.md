@@ -2,6 +2,8 @@
 Voice activated bot for Keep Talking and Nobody Explodes
 
 ## TODO
+- test each module, and make similar ocmmands for same module distinguishable
+- remove countWires function for wires module (make inline instead)
 - Make each stateful module reset itself once its spoken the final result
 - Move global module vars into constants file
 - Move module methods into their own files
