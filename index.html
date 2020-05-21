@@ -52,6 +52,7 @@ window.onload = () => {
       'wires *colors': wiresModule,
       'button :color :text': buttonModule,
       'color :color': buttonHoldModule,
+      'keypad *symbols': keypadsModule,
       'keypads *symbols': keypadsModule,
       'simon *colors': simonSaysModule,
       'memory *nums': memoryModule,
@@ -108,7 +109,7 @@ function knobsModule(lights) {
   var arr = lights.split(' ');
   
   var sequence = '';
-  for (light of lights) {
+  for (var light of lights) {
     if (light === 'on' || light === 'true' || light === 'one') {
       sequence += '1';
     } else {
@@ -372,7 +373,7 @@ function simonSaysModule(colors) {
     'yellow': ['red', 'green', 'red'],
   }
   
-  for (color of colors) {
+  for (var color of colors) {
     var newColor = (serialVowel) ? vowel[color][strikes] : noVowel[color][strikes];
     result.push(newColor);
   }
@@ -392,21 +393,24 @@ function keypadsModule(symbols) {
     ['six', 'e', 'equal', 'vowels', 'trident', 'n', 'omega']
   ];
 
-
-  var result;
-  for (group of groups) {
-    result = '';
-    for (symbol of arr) {
-      if (!group.includes(symbol)) {
-        break;
-      } else {
-        for (symbol2 of group) {
-          if (arr.includes(symbol2)) {
-            result += symbol2 + ' ';
-          }
-        }
+  var indexes, groupIndex;
+  for (var i = 0; i < groups.length; i++) {
+    indexes = [];
+    for (var j = 0; j < arr.length; j++) {
+      if (groups[i].includes(arr[j])) {
+        indexes.push(groups[i].indexOf(arr[j]));
       }
     }
+    if (indexes.length === 4) {
+      groupIndex = i;
+      break;
+    }
+  }
+
+  var result = '';
+  indexes.sort((a,b) => a - b ); // sorts numerically
+  for (var k = 0; k < indexes.length; k++) {
+    result += groups[groupIndex][indexes[k]] + ' ';
   }
 
   speak(result);
