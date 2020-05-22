@@ -8,3 +8,4 @@ Voice activated bot for Keep Talking and Nobody Explodes
 - Make each stateful module reset itself once its spoken the final result
 - Make bot prompt for info if its still needed, like how many batteries, so you dont have to give that info at the start
 - Document how to use in the readme
+- Hitting refresh borks the annyang voice recognition library???
