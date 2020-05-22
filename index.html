@@ -354,9 +354,8 @@ function memoryModuleReset() {
 }
 
 function simonSaysModule(colors) {
-  var arr = colors.split(' ');
+  var arr = arrConvertColors(colors.split(' '));
 
-  var result = [];
   var vowel = {
     'red': ['blue', 'yellow', 'green'],
     'blue': ['red', 'green', 'red'],
@@ -369,8 +368,9 @@ function simonSaysModule(colors) {
     'green': ['green', 'yellow', 'blue'],
     'yellow': ['red', 'green', 'red'],
   }
-  
-  for (var color of colors) {
+
+  var result = [];  
+  for (var color of arr) {
     var newColor = (serialVowel) ? vowel[color][strikes] : noVowel[color][strikes];
     result.push(newColor);
   }
@@ -450,7 +450,7 @@ function buttonHoldModule(lightColor) {
 }
 
 function wiresModule(colors) {
-  var arr = arrConvertColors(colors.toLowerCase().split(' '));
+  var arr = arrConvertColors(colors.split(' '));
   
   switch(arr.length) {
     case 3:
@@ -568,6 +568,7 @@ function speak(text) {
 
 
 function convertLetter(l) {
+  l = l.toLowerCase();
 	var letter = '';
 	switch(l) {
 		case 'b':
@@ -652,6 +653,7 @@ function convertLetter(l) {
 }
 
 function convertColor(c) {
+  c = c.toLowerCase();
 	var color = '';
 	switch (c) {
 		case 'read':
@@ -669,6 +671,7 @@ function convertColor(c) {
 }
 
 function convertBoolean(b) {
+  b = b.toLowerCase();
 	var bool;
   switch(b) {
     case 'true':
@@ -683,6 +686,7 @@ function convertBoolean(b) {
 }
 
 function convertNum(word) {
+  word = word.toLowerCase();
 	var num;
   switch(word) {
     case 'one':
